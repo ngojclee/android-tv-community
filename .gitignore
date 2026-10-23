@@ -1,0 +1,17 @@
+# Images and build leftovers (never commit)
+*.img
+*.img.xz
+*.img.zst
+*.part*
+p1.img
+boot0*.bin
+
+# Secrets
+secrets/
+*.env
+id_rsa*
+id_ed25519*
+
+# Logs / temp
+*.log
+*.tmp
