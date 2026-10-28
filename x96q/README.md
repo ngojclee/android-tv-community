@@ -29,9 +29,9 @@ The device tree is `sun50i-h313-x96q-lpddr3.dtb` and is patched for this board.
 | --- | --- |
 | File | `lnc-rescue-kvm-x96q-community-v0.3.img` |
 | Uncompressed | 5,372,903,424 bytes = 4 MiB boot header + 5 GiB rootfs |
-| SHA256 (`.img`) | `8a3e7bb8dadaff58cc827ffd490f8f0b9dc81f7fae9bebab4716a89061f7cbbb` |
-| Compressed | `lnc-rescue-kvm-x96q-community-v0.3.img.gz` — 1,026,944,747 bytes |
-| SHA256 (`.gz`) | `38e1d6f9fb6499dc70f6b491f1009c905d28d3e31469aa6e6cde6dc5a6db1eea` |
+| SHA256 (`.img`) | `c94dce87a4c122bfe180ff4f281545ba4b59d4204bb64b9c31b6688e286943cc` |
+| Compressed | `lnc-rescue-kvm-x96q-community-v0.3.img.gz` — 1,027,757,430 bytes |
+| SHA256 (`.gz`) | `a6dec74dbcf2cf544eab7b217714cfceeb045d3e1b7aaee4bbe60cc6c303938a` |
 | Base | Armbian 26.02.0-trunk X96Q v1.3, Bookworm, kernel 6.12.64 |
 | Rootfs | ext4, 5 GiB, ~2.9 GiB used |
 | Boot | SD only. No eMMC, no Android, no `armbian-install`. |
@@ -44,8 +44,9 @@ The `.gz` is a single gzip member and expands to the raw image. Verify with
 - Armbian Bookworm minimal, DHCP on `end0`, watchdog 16 s.
 - Docker + **One-KVM** (`kvmd`) with `hid.type=otg`, `msd.type=otg`,
   ports 4430 (https), 5900 (vnc), 8080 (streamer), 623/udp (ipmi).
-- `/dev/kvmd-video` udev symlink for the MS2130 capture card — kvmd never opens
-  the Cedrus VPU decoder (`/dev/video0`). Fixed in v0.3.
+- Capture device pinned at container creation (`VIDEONUM=1` → `/dev/video1`), so a
+  recreated container never opens the Cedrus VPU decoder (`/dev/video0`);
+  `99-x96q-capture.rules` additionally provides `/dev/kvmd-video`.
 - Patched device tree (`ehci0`/`ohci0` disabled) so USB0 runs in peripheral mode;
   a service restores the patched DTB after a kernel upgrade.
 - Wi-Fi opt-in with a boot-loop fail-safe (`/mnt/data/wifi.txt`).

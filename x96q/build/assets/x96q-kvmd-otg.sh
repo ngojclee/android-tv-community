@@ -1,6 +1,6 @@
 #!/bin/bash
 # x96q-kvmd-otg.sh - (re)create the kvmd container with OTG HID + MSD on the X96Q.
-# Community variant: no default password - WEBUSER/WEBPASS must be provided.
+# Community variant: no default password - WEBUSER/WEBPASS required.
 set -e
 IMAGE=registry.cn-hangzhou.aliyuncs.com/silentwind/kvmd:latest
 WEBUSER="${WEBUSER:-admin}"
@@ -11,7 +11,7 @@ if [ -z "$WEBPASS" ]; then
     exit 1
 fi
 
-# 1. group + udev rule so /dev/hidg* belong to kvmd (0660)
+# 1. group + udev rule so /dev/hidg* belong to kvmd.
 getent group kvmd >/dev/null || groupadd -g 1000 kvmd
 echo 'KERNEL=="hidg[0-9]*", MODE="0660", GROUP="kvmd"' > /etc/udev/rules.d/99-kvmd-hid.rules
 udevadm control --reload 2>/dev/null || true
@@ -45,7 +45,7 @@ docker run -d --name kvmd --restart always --privileged \
   -v /sys/kernel/config:/sys/kernel/config \
   -v /mnt/data/kvmd-msd:/var/lib/kvmd/msd \
   -p 4430:4430 -p 5900:5900 -p 623:623/udp -p 8080:8080 \
-  -e OTG=1 \
+  -e OTG=1 -e VIDEONUM=1 \
   -e USERNAME="$WEBUSER" \
   -e PASSWORD="$WEBPASS" \
   "$IMAGE" >/dev/null

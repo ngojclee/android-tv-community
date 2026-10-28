@@ -11,7 +11,7 @@ headless IP-KVM:
 
 - One-KVM web UI on `https://<box-ip>:4430/`
 - **USB OTG HID** (keyboard + mouse) and **virtual media** (ISO/IMG) on the USB0 port
-- HDMI capture through an MS2130 USB capture card (`/dev/kvmd-video`)
+- HDMI capture through an MS2130 USB capture card (`/dev/video1`, pinned)
 - Ethernet DHCP, optional Wi-Fi (`/mnt/data/wifi.txt`), optional NetBird
 - 16 s hardware watchdog
 
@@ -26,11 +26,17 @@ any hit. Fresh identity and credentials are created on the first boot.
 
 | Asset | Size | SHA256 |
 | --- | --- | --- |
-| `lnc-rescue-kvm-x96q-community-v0.3.img` | 5,372,903,424 bytes | `8a3e7bb8dadaff58cc827ffd490f8f0b9dc81f7fae9bebab4716a89061f7cbbb` |
-| `lnc-rescue-kvm-x96q-community-v0.3.img.gz` | 1,026,944,747 bytes | `38e1d6f9fb6499dc70f6b491f1009c905d28d3e31469aa6e6cde6dc5a6db1eea` |
+| `lnc-rescue-kvm-x96q-community-v0.3.img` | 5,372,903,424 bytes | `c94dce87a4c122bfe180ff4f281545ba4b59d4204bb64b9c31b6688e286943cc` |
+| `lnc-rescue-kvm-x96q-community-v0.3.img.gz` | 1,027,757,430 bytes | `a6dec74dbcf2cf544eab7b217714cfceeb045d3e1b7aaee4bbe60cc6c303938a` |
 
 `5 372 903 424` bytes uncompressed = 4 MiB boot header + 5 GiB rootfs.
 Base: Armbian 26.02.0-trunk, `BOARD=x96q-v1-3`, kernel 6.12.64.
+
+> **Revision 2026-10-28** — the image was rebuilt once before this note was
+> finalised. The first upload created the `kvmd` container without `VIDEONUM`, so
+> a fresh first boot captured from `/dev/video0` (the Cedrus decoder). Only
+> `/usr/local/sbin/x96q-kvmd-otg.sh` differs (one 4 KiB block, same file size);
+> every other block is byte-identical to the first upload.
 
 ## First boot
 
@@ -47,8 +53,11 @@ Details: [FIRST-BOOT.md](FIRST-BOOT.md).
 
 - v0.3 device tree patch: `ehci0`/`ohci0` disabled so USB0 runs in peripheral
   mode (OTG HID + MSD), restored automatically after a kernel upgrade.
-- v0.3 capture fix: udev symlink `/dev/kvmd-video` for the MS2130; kvmd no longer
-  opens the Cedrus VPU decoder (`/dev/video0`).
+- v0.3 capture fix: the `kvmd` container is created with `VIDEONUM=1`, so its
+  first-init rewrites `override.yaml` and `janus.plugin.ustreamer.jcfg` to
+  `/dev/video1`; `99-x96q-capture.rules` also provides `/dev/kvmd-video`. A
+  recreated container therefore never falls back to the Cedrus VPU decoder
+  (`/dev/video0`).
 - Community: secrets scrubbed, first-boot service, `x96q-creds`,
   `x96q-kvmd-password`, `x96q-grow-root.sh`, English docs.
 
