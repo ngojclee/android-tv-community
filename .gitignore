@@ -1,5 +1,6 @@
 # Images and build leftovers (never commit)
 *.img
+*.img.gz
 *.img.xz
 *.img.zst
 *.part*

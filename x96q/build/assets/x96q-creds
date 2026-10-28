@@ -1,0 +1,24 @@
+#!/bin/bash
+# x96q-creds - show the credentials generated on first boot.
+F=/root/.x96q-credentials
+[ -r "$F" ] || {
+    echo "No credential file at $F."
+    echo "It is created on the first boot and can be deleted once you saved the passwords."
+    exit 1
+}
+# shellcheck disable=SC1090
+. "$F"
+IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+GEN=$(sed -n 's/^# X96Q rescue KVM - credentials generated on //p' "$F")
+
+cat <<EOT
+X96Q rescue KVM credentials${GEN:+ (generated $GEN)}
+
+  console / SSH  :  ${ROOT_USER:-root} / ${ROOT_PASSWORD:-<unset>}
+  One-KVM web UI :  ${KVMD_USER:-admin} / ${KVMD_PASSWORD:-<unset>}
+                    https://${IP:-<box-ip>}:4430/
+
+  change the system password :  passwd
+  change the web password    :  x96q-kvmd-password 'new-password'
+  credential file            :  $F  (root only, delete when done)
+EOT

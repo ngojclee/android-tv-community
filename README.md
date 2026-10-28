@@ -1,37 +1,54 @@
 # android-tv-community
 
-Community, secret-free rescue/IP-KVM images for Allwinner TV boxes.
+Community, **secret-free** rescue / IP-KVM images for Allwinner TV boxes.
 
-Every image here is built from a clean upstream base, contains **no credentials, keys,
-Wi-Fi passwords or mesh identities**, and runs a first-boot setup on the device.
+Every image here is built from the author's own working box, then scrubbed and
+re-identified: no SSH keys, no Wi-Fi passwords, no NetBird (or other mesh)
+identities, no logs, no personal IP addresses, no fixed `machine-id` or SSH host
+keys. A first-boot service generates fresh credentials on the device and prints
+them on the console.
 
 ## Devices
 
-| Device | Board | Status |
-| --- | --- | --- |
-| [x96q](x96q/) | X96Q BA301 v1.3 / Allwinner H313 | image in preparation |
+| Device | Board | Image | Status |
+| --- | --- | --- | --- |
+| [x96q](x96q/) | X96Q BA301 v1.3 / Allwinner H313 | `v0.3` | released |
 
-## What you get
+## What you get (x96q)
 
-- Bootable Armbian rescue system on SD.
-- One-KVM (video + CH9329 HID) pre-installed.
-- NetBird client installed but **unconfigured** (you supply your own setup key).
-- Optional exFAT data partition for ISOs and files.
+- Bootable Armbian Bookworm rescue system on SD (no eMMC, no Android).
+- One-KVM (`kvmd`) pre-installed: web UI, **USB OTG HID** (keyboard/mouse) and
+  **virtual media** (ISO/IMG over the gadget), plus USB capture-card support.
+- Docker image for `kvmd` bundled, so the appliance works offline on first boot.
+- NetBird client installed but **not joined** — you supply your own setup key.
+- Optional exFAT data partition for ISOs (created by you, on the card).
+- Watchdog enabled (16 s) and a Wi-Fi fail-safe for the unstable XR829 radio.
 
-## What you must do after first boot
+## After first boot
 
-1. Change the default password.
-2. Configure networking (Ethernet is the supported path; Wi-Fi on XR829 is unstable).
-3. Optionally join your own NetBird network with your own key.
-4. Create the data partition if you want one.
+1. Read the generated credentials with `x96q-creds` (they are also printed once
+   on the console at first boot).
+2. Change both passwords (`passwd`, `x96q-kvmd-password`).
+3. Plug Ethernet. Wi-Fi is opt-in and unstable on this board.
+4. Optionally join your own NetBird network with your own key.
+
+See [x96q/docs/FIRST-BOOT.md](x96q/docs/FIRST-BOOT.md) and
+[x96q/docs/DEPLOY.md](x96q/docs/DEPLOY.md).
 
 ## Safety
 
-- No Android firmware is distributed here. Flashing Android is out of scope.
+- No Android firmware is distributed here. Flashing Android / eMMC is out of scope.
 - Board revisions differ; verify your PCB before writing any image.
+- Only the **USB0** port of the X96Q is a device port. Never connect two hosts
+  with an A–A cable.
 - Read each device README for known hardware limitations.
 
 ## License / attribution
 
-Images are built on Armbian (see upstream licenses) plus One-KVM and NetBird.
-Attribution and exact source revisions are recorded per device README.
+Images are built on [Armbian](https://www.armbian.com/) (GPL-2.0) with
+[One-KVM / kvmd](https://github.com/silentwind0/kvmd), Docker, NetBird and the
+Linux kernel. Upstream licenses apply to those components. The `kvmd` container
+image is embedded for offline use and is redistributed unmodified from
+`registry.cn-hangzhou.aliyuncs.com/silentwind/kvmd:latest`; remove or replace it
+if you prefer to pull your own. Build scripts and local glue in this repository
+are provided under GPL-2.0.

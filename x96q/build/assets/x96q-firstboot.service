@@ -1,0 +1,15 @@
+[Unit]
+Description=X96Q community image - first boot (identity, credentials, kvmd)
+Documentation=https://github.com/ngojclee/android-tv-community
+After=docker.service network-online.target local-fs.target
+Wants=docker.service network-online.target
+ConditionPathExists=!/var/lib/x96q/.firstboot-done
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/x96q-firstboot.sh
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
